@@ -1,0 +1,90 @@
+﻿"Phrases"
+{
+	"TurnedOff"
+	{
+		"#format"	"{1:s}"
+		"hu"		"A {1} jelenleg ki van kapcsolva."
+		"en"		"The {1} is disabled."
+	}
+	"MustBeAlive"
+	{
+		"hu"		"A parancs használatához életben kell lenned."
+		"en"		"You must be alive to use this command."
+	}
+	"MustBeInGame"
+	{
+		"hu"		"A parancs csak a játékban használható."
+		"en"		"The command can be used in game only."
+	}
+	"NoOneFound"
+	{
+		"hu"		"Nincsenek körülötted játékosok."
+		"en"		"There are no players around you."
+	}
+	"ItsABot"
+	{
+		"hu"		"A legközelebbi játékos egy BOT."
+		"en"		"The nearest player is a BOT."
+	}
+	"OnlyCT"
+	{
+		"hu"		"Ez a parancs a jelenlegi csapatban nem használható."
+		"en"		"This command cannot be used in the current team."
+	}
+	"NearestCT"
+	{
+		"hu"		"A legközelebbi játékos CT."
+		"en"		"The nearest player is a Guard."
+	}
+	"WrongChoosen"
+	{
+		"hu"		"Ezt a játékost nem te bilincselted meg, így csak a társad halála után veheted le róla a bilincset."
+		"en"		"This player has been handcuffed by your teammate. You can only get off the handcuffs when your teammate dies."
+	}
+	"StartedToHandCuff"
+	{
+		"#format"	"{1:N},{2:N}"
+		"hu"		"{1} elkezdte megbilincselni {2} játékost."
+		"en"		"{1} started to handcuff {2}."
+	}
+	"StoppedHandCuff"
+	{
+		"#format"	"{1:N},{2:N}"
+		"hu"		"{1} nem tudta megbilincselni {2} játékost."
+		"en"		"{1} didn't handcuff {2}."
+	}
+	"StartedToUnCuff"
+	{
+		"#format"	"{1:N},{2:N}"
+		"hu"		"{1} elkezdte levenni {2} bilincsét."
+		"en"		"{1} started to uncuff {2}."
+	}
+	"StoppedUnCuff"
+	{
+		"#format"	"{1:N},{2:N}"
+		"hu"		"{1} nem tudta levenni {2} bilincsét."
+		"en"		"{1} didn't remove {2}'s handcuff."
+	}
+	"Handcuffed"
+	{
+		"#format"	"{1:N},{2:N}"
+		"hu"		"{1} megbilincselte {2} játékost."
+		"en"		"{2} has been handcuffed by {1}."
+	}
+	"Uncuffed"
+	{
+		"#format"	"{1:N},{2:N}"
+		"hu"		"{1} levette {2} játékos bilincsét."
+		"en"		"{1} has removed the handcuff from {2}."
+	}
+	"NotEnough"
+	{
+		"hu"		"Nincs elég játékos a bilincs használatához."
+		"en"		"There is not enough player to use handcuffs."
+	}
+	"UsedElse"
+	{
+		"hu"		"A bilincsed egy másik játékoson van."
+		"en"		"Your handcuff is in another player."
+	}
+}
