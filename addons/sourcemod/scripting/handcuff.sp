@@ -30,6 +30,7 @@ int nearest;
 
 int g_bMinimumP = 2;
 bool g_bEnabled = true;
+bool g_bSounds = true;
 float g_bRadius = 50.0;
 
 Handle UseTimer[MAXPLAYERS + 1];
@@ -55,6 +56,7 @@ char t_Name[16] = "\x07HandCuff\x0B";
 
 //ConVars
 ConVar g_hEnabled;
+ConVar g_hSounds;
 ConVar g_hMinimum;
 ConVar g_hRadius;
 
@@ -63,18 +65,20 @@ public Plugin myinfo =
 	name = "[CSGO][JB] Guard HandCuff", 
 	author = "Entity", 
 	description = "Adds the HandCuff feature to jailbreak.", 
-	version = "0.1.1"
+	version = "0.1.2"
 };
 
 public void OnPluginStart()
 {
 	LoadTranslations("ent_handcuff.phrases");
-
-	g_hEnabled = CreateConVar("sm_hc_enabled", "1", "Enable the BodySearch?", 0, true, 0.0, true, 1.0);
-	g_hMinimum = CreateConVar("sm_hc_minimum", "2", "Minimum prisoner to use handcuffs?", 0, true, 0.0, false, _);
-	g_hRadius = CreateConVar("sm_hc_radius", "50.0", "Radius of the BodySearch", 0, true, 0.0, true, 1000.0);
+	
+	g_hEnabled = CreateConVar("sm_hc_enabled", "1", "Enable/Disable handcuff feature", 0, true, 0.0, true, 1.0);
+	g_hSounds = CreateConVar("sm_hc_sounds", "1", "Use handcuff sounds on use", 0, true, 0.0, true, 1.0);
+	g_hMinimum = CreateConVar("sm_hc_minimum", "2", "Minimum players to enable handcuffs", 0, true, 0.0, false, _);
+	g_hRadius = CreateConVar("sm_hc_radius", "50.0", "Maxmimum radius to target players with handcuff", 0, true, 0.0, true, 1000.0);
 	
 	HookConVarChange(g_hEnabled, OnCvarChange_Enabled);
+	HookConVarChange(g_hSounds, OnCvarChange_Sounds);
 	HookConVarChange(g_hMinimum, OnCvarChange_Minimum);
 	HookConVarChange(g_hRadius, OnCvarChange_Radius);
 	
@@ -83,20 +87,59 @@ public void OnPluginStart()
 	RegConsoleCmd("sm_handcuff", Command_HandCuff);
 	RegConsoleCmd("sm_hc", Command_HandCuff);
 	
-	AddFileToDownloadsTable("sound/entity/handcuff/handcuff_on.mp3");
-	AddFileToDownloadsTable("sound/entity/handcuff/handcuff_off.mp3");
-	PrecacheSoundAny("entity/handcuff/handcuff_on.mp3");
-	PrecacheSoundAny("entity/handcuff/handcuff_off.mp3");
+	if (FileExists("sound/entity/handcuff/handcuff_on.mp3"))
+	{
+		AddFileToDownloadsTable("sound/entity/handcuff/handcuff_on.mp3");
+		PrecacheSoundAny("entity/handcuff/handcuff_on.mp3");
+	}
+	else
+	{
+		g_bSounds = false;
+		SetConVarInt(g_hSounds, 0);
+	}
+	
+	if (FileExists("sound/entity/handcuff/handcuff_off.mp3"))
+	{
+		AddFileToDownloadsTable("sound/entity/handcuff/handcuff_off.mp3");
+		PrecacheSoundAny("entity/handcuff/handcuff_off.mp3");
+	}
+	else
+	{
+		g_bSounds = false;
+		SetConVarInt(g_hSounds, 0);
+	}
 	
 	AutoExecConfig(true, "ent_handcuff");
 }
 
+public void OnPluginEnd()
+{
+	UnCuffAll();
+}
+
 public void OnMapStart()
 {
-	AddFileToDownloadsTable("sound/entity/handcuff/handcuff_on.mp3");
-	AddFileToDownloadsTable("sound/entity/handcuff/handcuff_off.mp3");
-	PrecacheSoundAny("entity/handcuff/handcuff_on.mp3");
-	PrecacheSoundAny("entity/handcuff/handcuff_off.mp3");
+	if (FileExists("sound/entity/handcuff/handcuff_on.mp3"))
+	{
+		AddFileToDownloadsTable("sound/entity/handcuff/handcuff_on.mp3");
+		PrecacheSoundAny("entity/handcuff/handcuff_on.mp3");
+	}
+	else
+	{
+		g_bSounds = false;
+		SetConVarInt(g_hSounds, 0);
+	}
+	
+	if (FileExists("sound/entity/handcuff/handcuff_off.mp3"))
+	{
+		AddFileToDownloadsTable("sound/entity/handcuff/handcuff_off.mp3");
+		PrecacheSoundAny("entity/handcuff/handcuff_off.mp3");
+	}
+	else
+	{
+		g_bSounds = false;
+		SetConVarInt(g_hSounds, 0);
+	}
 }
 
 public Action OnWeaponThingy(int client, int weapon)  
@@ -106,8 +149,35 @@ public Action OnWeaponThingy(int client, int weapon)
 
 public void OnCvarChange_Enabled(ConVar cvar, char[] oldvalue, char[] newvalue)
 {
-	if (StrEqual(newvalue, "1")) g_bEnabled = true;
-	else if (StrEqual(newvalue, "0")) g_bEnabled = false;
+	if (StrEqual(newvalue, "1"))
+	{
+		g_bEnabled = true;
+	}
+	else if (StrEqual(newvalue, "0"))
+	{
+		g_bEnabled = false;
+		UnCuffAll();
+	}
+}
+
+public void OnCvarChange_Sounds(ConVar cvar, char[] oldvalue, char[] newvalue)
+{
+	if (StrEqual(newvalue, "1"))
+	{
+		if (FileExists("sound/entity/handcuff/handcuff_off.mp3") && FileExists("sound/entity/handcuff/handcuff_on.mp3"))
+		{
+			g_bSounds = true;
+		}
+		else
+		{
+			SetConVarInt(g_hSounds, 0);
+			PrintToChatAll("%s %t", Prefix, "SoundsNotFound");
+		}
+	}
+	else if (StrEqual(newvalue, "0"))
+	{
+		g_bSounds = false;
+	}
 }
 
 public void OnCvarChange_Radius(ConVar cvar, char[] oldvalue, char[] newvalue)
@@ -132,7 +202,7 @@ public Action Command_HandCuff(int client, int args)
 	{
 		if (IsPlayerAlive(client))
 		{
-			if (IsClientInGame(client) && IsClientConnected(nearest))
+			if (IsClientInGame(client))
 			{
 				float clientOrigin[3];
 				float searchOrigin[3];
@@ -185,7 +255,7 @@ public Action Command_HandCuff(int client, int args)
 											if (C_Choosen[client] == nearest)
 											{
 												C_Nearest[client] = nearest;
-											
+												
 												PrintToChatAll("%s %t", Prefix, "StartedToUnCuff", client, nearest);
 											
 												UnUseTimer[client] = CreateTimer(1.0, Timer_UnUseTimerTick, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
@@ -201,7 +271,7 @@ public Action Command_HandCuff(int client, int args)
 											C_Nearest[client] = nearest;
 										
 											PrintToChatAll("%s %t", Prefix, "StartedToUnCuff", client, nearest);
-										
+											
 											UnUseTimer[client] = CreateTimer(1.0, Timer_UnUseTimerTick, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 										}
 									}
@@ -270,7 +340,7 @@ public Action Timer_UnUseTimerTick(Handle timer, int client)
 		
 		C_UnUseTimer[client] = 1;
 		
-		HandCuffOff(client, C_Nearest[client]);
+		HandCuffOff(client, C_Nearest[client], false);
 	}
 	else
 	{
@@ -283,10 +353,9 @@ public Action OnPlayerRunCmd(int client,int &buttons,int &impulse, float vel[3],
 {
 	if (IsValidClient(client) && (OPRC_CD[client] == INVALID_HANDLE))
 	{
-		int current = GetClientButtons(client);
-		if (current == IN_ATTACK || current == IN_JUMP || current == IN_DUCK || current == IN_FORWARD || current == IN_BACK || \
-			current == IN_LEFT || current == IN_RIGHT || current == IN_WALK || current == IN_RUN || current == IN_SPEED || \
-			current == IN_RELOAD || current == IN_ATTACK2 || current == IN_MOVELEFT || current == IN_MOVERIGHT)
+		if (buttons == IN_ATTACK || buttons == IN_JUMP || buttons == IN_DUCK || buttons == IN_FORWARD || buttons == IN_BACK || \
+			buttons == IN_LEFT || buttons == IN_RIGHT || buttons == IN_WALK || buttons == IN_RUN || buttons == IN_SPEED || \
+			buttons == IN_RELOAD || buttons == IN_ATTACK2 || buttons == IN_MOVELEFT || buttons == IN_MOVERIGHT)
 		{
 			if (GetClientTeam(client) == 2)
 			{
@@ -369,7 +438,7 @@ public Action OnPlayerSpawn(Event event, char[] name, bool dontBroadcast)
 void HandCuffOn(int client, int target)
 {
 	PlaySound(false);
-
+	
 	C_HandCuffed[target] = true;
 	C_HandCuffUsed[client] = true;
 
@@ -380,10 +449,10 @@ void HandCuffOn(int client, int target)
 	SaveWeapons(target);
 }
 
-void HandCuffOff(int client, int target)
+void HandCuffOff(int client, int target, bool forced)
 {
 	PlaySound(true);
-
+	
 	C_Choosen[client] = -1;
 	C_ChoosedBy[target] = -1;										
 
@@ -392,19 +461,40 @@ void HandCuffOff(int client, int target)
 
 	SetEntityRenderColor(target, 255, 255, 255, 255);
 
-	PrintToChatAll("%s %t", Prefix, "Uncuffed", client, target);
+	if (!forced) PrintToChatAll("%s %t", Prefix, "Uncuffed", client, target);
 	SDKUnhook(target, SDKHook_WeaponCanUse, OnWeaponThingy);
 	RestoreWeapons(target);
 }
 
 void PlaySound(bool Cuffed) 
 { 
-	if (Cuffed)
+	if (g_bSounds)
 	{
-		EmitSoundToAllAny("entity/handcuff/handcuff_off.mp3");
+		if (Cuffed)
+		{
+			if (FileExists("sound/entity/handcuff/handcuff_off.mp3"))
+			{
+				EmitSoundToAllAny("entity/handcuff/handcuff_off.mp3");
+			}
+		}
+		else
+		{
+			if (FileExists("sound/entity/handcuff/handcuff_on.mp3"))
+			{
+				EmitSoundToAllAny("entity/handcuff/handcuff_on.mp3");
+			}
+		}
 	}
-	else
-	{				
-		EmitSoundToAllAny("entity/handcuff/handcuff_on.mp3");
+}
+
+void UnCuffAll()
+{
+	for(int i = 1; i <= MaxClients; i++)
+	{
+		if (IsValidClient(i) && C_HandCuffed[i])
+		{
+			HandCuffOff(C_ChoosedBy[i], i, true);
+			PrintToChatAll("%s %t", Prefix, "PluginStopped", i);
+		}
 	}
 }

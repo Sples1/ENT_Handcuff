@@ -87,4 +87,15 @@
 		"hu"		"A bilincsed egy másik játékoson van."
 		"en"		"Your handcuff is in another player."
 	}
+	"SoundsNotFound"
+	{
+		"hu"		"A bilincs hanghatások ki lettek kapcsolva, mivel nem található a hangfájl."
+		"en"		"Handcuff sounds has been turned off because no sound files found."
+	}
+	"PluginStopped"
+	{
+		"#format"	"{1:N}"
+		"hu"		"{1} bilincse levételre került, mivel a bilincs kiegészítés ki lett kapcsolva."
+		"en"		"Handcuff removed from {1} becuase the feature has been disabled."
+	}
 }
