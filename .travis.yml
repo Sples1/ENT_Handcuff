@@ -17,7 +17,7 @@ before_script:
     - SMPACKAGE="https://www.sourcemod.net/smdrop/$SMVERSION/$SMLATEST"
     - wget $SMPACKAGE
     - tar -xzf $(basename "$SMPACKAGE")
-    - cp addons/sourcemod/scripting/handcuff.sp addons/sourcemod/scripting/
+    - cp addons/sourcemod/scripting/handcuff.sp addons/sourcemod/scripting
     - cp addons/sourcemod/scripting/include/entcuff.inc addons/sourcemod/scripting/include
     - cd addons/sourcemod/scripting/
     - chmod +x spcomp
