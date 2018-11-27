@@ -28,36 +28,36 @@
 //Global Vars
 int nearest;
 
-int g_bMinimumP = 2;
 bool g_bEnabled = true;
+bool g_bDebug = false;
+int g_bMinimumP = 2;
 bool g_bSounds = true;
 float g_bRadius = 50.0;
 
 Handle UseTimer[MAXPLAYERS + 1];
-Handle UnUseTimer[MAXPLAYERS + 1];
-Handle OPRC_CD[MAXPLAYERS + 1] = INVALID_HANDLE;
+bool C_Checkable[MAXPLAYERS + 1];
+bool S_TargetCuffed[MAXPLAYERS + 1];
 int C_UseTimer[MAXPLAYERS + 1] = 1;
-int C_UnUseTimer[MAXPLAYERS + 1] = 1;
 int C_Nearest[MAXPLAYERS + 1] = -1;
 
 //Prisoner Vars
 int C_ChoosedBy[MAXPLAYERS + 1];
 bool C_HandCuffed[MAXPLAYERS + 1] = false;
-bool C_GettingArrested[MAXPLAYERS + 1] = false;
 
 //Guard Vars
 int C_Choosen[MAXPLAYERS + 1];
 bool C_HandCuffUsed[MAXPLAYERS + 1] = false;
-bool C_Arresting[MAXPLAYERS + 1] = false;
 
 //Translations
 char Prefix[32] = "\x01[\x07HandCuff\x01] \x0B";
+char DPrefix[32] = "\x01[\x07HandCuff-Debug\x01] \x0B";
 char t_Name[16] = "\x07HandCuff\x0B";
 
 //ConVars
 ConVar g_hEnabled;
-ConVar g_hSounds;
+ConVar g_hDebug;
 ConVar g_hMinimum;
+ConVar g_hSounds;
 ConVar g_hRadius;
 
 public Plugin myinfo = 
@@ -65,7 +65,7 @@ public Plugin myinfo =
 	name = "[CSGO][JB] Guard HandCuff", 
 	author = "Entity", 
 	description = "Adds the HandCuff feature to jailbreak.", 
-	version = "0.1.2"
+	version = "0.2"
 };
 
 public void OnPluginStart()
@@ -73,11 +73,13 @@ public void OnPluginStart()
 	LoadTranslations("ent_handcuff.phrases");
 	
 	g_hEnabled = CreateConVar("sm_hc_enabled", "1", "Enable/Disable handcuff feature", 0, true, 0.0, true, 1.0);
+	g_hDebug = CreateConVar("sm_hc_debug", "0", "Enable/Disable handcuff debugs", 0, true, 0.0, true, 1.0);
 	g_hSounds = CreateConVar("sm_hc_sounds", "1", "Use handcuff sounds on use", 0, true, 0.0, true, 1.0);
 	g_hMinimum = CreateConVar("sm_hc_minimum", "2", "Minimum players to enable handcuffs", 0, true, 0.0, false, _);
 	g_hRadius = CreateConVar("sm_hc_radius", "50.0", "Maxmimum radius to target players with handcuff", 0, true, 0.0, true, 1000.0);
 	
 	HookConVarChange(g_hEnabled, OnCvarChange_Enabled);
+	HookConVarChange(g_hDebug, OnCvarChange_Debug);
 	HookConVarChange(g_hSounds, OnCvarChange_Sounds);
 	HookConVarChange(g_hMinimum, OnCvarChange_Minimum);
 	HookConVarChange(g_hRadius, OnCvarChange_Radius);
@@ -123,28 +125,37 @@ public void OnMapStart()
 	{
 		AddFileToDownloadsTable("sound/entity/handcuff/handcuff_on.mp3");
 		PrecacheSoundAny("entity/handcuff/handcuff_on.mp3");
+		
+		if (g_bDebug) PrintToChatAll("%s handcuff_on.mp3 found", DPrefix);
 	}
 	else
 	{
 		g_bSounds = false;
 		SetConVarInt(g_hSounds, 0);
+		
+		if (g_bDebug) PrintToChatAll("%s handcuff_on.mp3 is missing", DPrefix);
 	}
 	
 	if (FileExists("sound/entity/handcuff/handcuff_off.mp3"))
 	{
 		AddFileToDownloadsTable("sound/entity/handcuff/handcuff_off.mp3");
 		PrecacheSoundAny("entity/handcuff/handcuff_off.mp3");
+		
+		if (g_bDebug) PrintToChatAll("%s handcuff_off.mp3 found", DPrefix);
 	}
 	else
 	{
 		g_bSounds = false;
 		SetConVarInt(g_hSounds, 0);
+		
+		if (g_bDebug) PrintToChatAll("%s handcuff_off.mp3 is missing", DPrefix);
 	}
 }
 
 public Action OnWeaponThingy(int client, int weapon)  
 {
-    return Plugin_Handled;
+	if (g_bDebug) PrintToChatAll("%s %N tried to interact with a weapon", DPrefix, client);
+	return Plugin_Handled;
 } 
 
 public void OnCvarChange_Enabled(ConVar cvar, char[] oldvalue, char[] newvalue)
@@ -185,6 +196,12 @@ public void OnCvarChange_Radius(ConVar cvar, char[] oldvalue, char[] newvalue)
 	g_bRadius = GetConVarFloat(g_hRadius);
 }
 
+public void OnCvarChange_Debug(ConVar cvar, char[] oldvalue, char[] newvalue)
+{
+	if (StrEqual(newvalue, "1")) g_bDebug = true;
+	else if (StrEqual(newvalue, "0")) g_bDebug = false;
+}
+
 public void OnCvarChange_Minimum(ConVar cvar, char[] oldvalue, char[] newvalue)
 {
 	g_bMinimumP = GetConVarInt(g_hMinimum);
@@ -215,7 +232,7 @@ public Action Command_HandCuff(int client, int args)
 
 				if (nearest != 0)
 				{
-					if(!IsFakeClient(nearest))
+					if(nearest != 0 /*!IsFakeClient(nearest)*/)
 					{
 						if (GetClientTeam(client) != GetClientTeam(nearest))
 						{
@@ -231,15 +248,18 @@ public Action Command_HandCuff(int client, int args)
 									{
 										if (!C_HandCuffUsed[client])
 										{
-											C_GettingArrested[nearest] = true;
-											C_Arresting[client] = true;
-											
 											C_Nearest[client] = nearest;
 											
 											C_Choosen[client] = nearest;
 											C_ChoosedBy[nearest] = client;
 											
 											PrintToChatAll("%s %t", Prefix, "StartedToHandCuff", client, nearest);
+											
+											C_Checkable[client] = true;
+											C_Checkable[nearest] = true;
+											S_TargetCuffed[client] = false;
+											
+											if (g_bDebug) PrintToChatAll("%s %N started to handcuff %N", DPrefix, client, nearest);
 											
 											UseTimer[client] = CreateTimer(1.0, Timer_UseTimerTick, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 										}
@@ -258,21 +278,32 @@ public Action Command_HandCuff(int client, int args)
 												
 												PrintToChatAll("%s %t", Prefix, "StartedToUnCuff", client, nearest);
 											
-												UnUseTimer[client] = CreateTimer(1.0, Timer_UnUseTimerTick, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+												C_Checkable[client] = true;
+												C_Checkable[nearest] = true;
+												S_TargetCuffed[client] = true;
+												
+												if (g_bDebug) PrintToChatAll("%s %N started to uncuff %N", DPrefix, client, nearest);
+												
+												UseTimer[client] = CreateTimer(1.0, Timer_UseTimerTick, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 											}
 											else
-											{
-											
+											{											
 												PrintToChat(client, "%s %t", Prefix, "WrongChoosen");
 											}
 										}
 										else
 										{
 											C_Nearest[client] = nearest;
-										
+											
 											PrintToChatAll("%s %t", Prefix, "StartedToUnCuff", client, nearest);
 											
-											UnUseTimer[client] = CreateTimer(1.0, Timer_UnUseTimerTick, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
+											C_Checkable[client] = true;
+											C_Checkable[nearest] = true;
+											S_TargetCuffed[client] = true;
+											
+											if (g_bDebug) PrintToChatAll("%s %N started to uncuff %N", DPrefix, client, nearest);
+											
+											UseTimer[client] = CreateTimer(1.0, Timer_UseTimerTick, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 										}
 									}
 								}
@@ -316,13 +347,25 @@ public Action Command_HandCuff(int client, int args)
 public Action Timer_UseTimerTick(Handle timer, int client)
 {
 	if (C_UseTimer[client] == 0)
-	{
+	{	
 		KillTimer(UseTimer[client]);
 		UseTimer[client] = INVALID_HANDLE;
 		
 		C_UseTimer[client] = 1;
 		
-		HandCuffOn(client, C_Nearest[client]);
+		C_Checkable[client] = false;
+		C_Checkable[C_Nearest[client]] = false;
+	
+		if (!S_TargetCuffed[client])
+		{		
+			if (g_bDebug) PrintToChatAll("%s %N handcuff timer stopped", DPrefix, client);		
+			HandCuffOn(client, C_Nearest[client]);
+		}
+		else
+		{	
+			if (g_bDebug) PrintToChatAll("%s %N uncuff timer stopped", DPrefix, client);		
+			HandCuffOff(client, C_Nearest[client], false);
+		}
 	}
 	else
 	{
@@ -331,27 +374,9 @@ public Action Timer_UseTimerTick(Handle timer, int client)
 	return Plugin_Continue;
 }
 
-public Action Timer_UnUseTimerTick(Handle timer, int client)
-{
-	if (C_UnUseTimer[client] == 0)
-	{
-		KillTimer(UnUseTimer[client]);
-		UnUseTimer[client] = INVALID_HANDLE;
-		
-		C_UnUseTimer[client] = 1;
-		
-		HandCuffOff(client, C_Nearest[client], false);
-	}
-	else
-	{
-		C_UnUseTimer[client] = C_UnUseTimer[client] - 1;
-	}
-	return Plugin_Continue;
-}
-
 public Action OnPlayerRunCmd(int client,int &buttons,int &impulse, float vel[3], float angles[3],int &weapon)
 {
-	if (IsValidClient(client) && (OPRC_CD[client] == INVALID_HANDLE))
+	if (IsValidClient(client) && C_Checkable[client])
 	{
 		if (buttons == IN_ATTACK || buttons == IN_JUMP || buttons == IN_DUCK || buttons == IN_FORWARD || buttons == IN_BACK || \
 			buttons == IN_LEFT || buttons == IN_RIGHT || buttons == IN_WALK || buttons == IN_RUN || buttons == IN_SPEED || \
@@ -361,69 +386,51 @@ public Action OnPlayerRunCmd(int client,int &buttons,int &impulse, float vel[3],
 			{
 				if (UseTimer[C_ChoosedBy[client]] != INVALID_HANDLE)
 				{
-					if (OPRC_CD[client] == INVALID_HANDLE)
+					KillTimer(UseTimer[C_ChoosedBy[client]]);
+					UseTimer[C_ChoosedBy[client]] = INVALID_HANDLE;
+					C_UseTimer[C_ChoosedBy[client]] = 1;
+					
+					C_Checkable[client] = false;
+					C_Checkable[C_Nearest[client]] = false;
+					
+					if (!S_TargetCuffed[C_ChoosedBy[client]])
 					{
-						KillTimer(UseTimer[C_ChoosedBy[client]]);
-						UseTimer[C_ChoosedBy[client]] = INVALID_HANDLE;
-						C_UseTimer[C_ChoosedBy[client]] = 1;
-						
+						if (g_bDebug) PrintToChatAll("%s %N stopped %N handcuff timer", DPrefix, client, C_ChoosedBy[client]);
 						PrintToChatAll("%s %t", Prefix, "StoppedHandCuff", C_ChoosedBy[client], client);
-						OPRC_CD[client] = CreateTimer(0.25, Timer_OPRC_CD_Tick, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 					}
-				}
-				else if (UnUseTimer[C_ChoosedBy[client]] != INVALID_HANDLE)
-				{
-					if (OPRC_CD[client] == INVALID_HANDLE)
+					else
 					{
-						KillTimer(UnUseTimer[C_ChoosedBy[client]]);
-						UseTimer[C_ChoosedBy[client]] = INVALID_HANDLE;
-						C_UseTimer[C_ChoosedBy[client]] = 1;
-						
+						if (g_bDebug) PrintToChatAll("%s %N stopped %N unndcuff timer", DPrefix, client, C_ChoosedBy[client]);
 						PrintToChatAll("%s %t", Prefix, "StoppedUnCuff", C_ChoosedBy[client], client);
-						OPRC_CD[client] = CreateTimer(0.25, Timer_OPRC_CD_Tick, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 					}
 				}
 			}
 			else if (GetClientTeam(client) == 3)
-			{
-				int Choosen = C_Choosen[client]
+			{			
 				if (UseTimer[client] != INVALID_HANDLE)
 				{
-					if (OPRC_CD[client] == INVALID_HANDLE)
+					KillTimer(UseTimer[client]);
+					UseTimer[client] = INVALID_HANDLE;
+					C_UseTimer[client] = 1;
+					
+					C_Checkable[client] = false;
+					C_Checkable[C_Nearest[client]] = false;
+					
+					if (!S_TargetCuffed[client])
 					{
-						KillTimer(UseTimer[client]);
-						UseTimer[client] = INVALID_HANDLE;
-						C_UseTimer[client] = 1;
-						
+						if (g_bDebug) PrintToChatAll("%s %N stopped %N handcuff timer", DPrefix, client, client);
 						PrintToChatAll("%s %t", Prefix, "StoppedHandCuff", client, C_Nearest[client]);
-						OPRC_CD[client] = CreateTimer(0.25, Timer_OPRC_CD_Tick, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 					}
-				}
-				else if (UnUseTimer[client] != INVALID_HANDLE)
-				{
-					if (OPRC_CD[client] == INVALID_HANDLE)
+					else
 					{
-						C_GettingArrested[Choosen] = false;
-						C_Arresting[client] = false;
-						
-						KillTimer(UnUseTimer[client]);
-						UnUseTimer[client] = INVALID_HANDLE;
-						C_UnUseTimer[client] = 1;
-						
+						if (g_bDebug) PrintToChatAll("%s %N stopped %N uncuff timer", DPrefix, client, client);
 						PrintToChatAll("%s %t", Prefix, "StoppedUnCuff", client, C_Nearest[client]);
-						OPRC_CD[client] = CreateTimer(0.25, Timer_OPRC_CD_Tick, client, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 					}
 				}
 			}
 		}
 	}
 	return Plugin_Continue;
-}
-
-public Action Timer_OPRC_CD_Tick(Handle timer, int client)
-{
-	KillTimer(OPRC_CD[client]);
-	OPRC_CD[client] = INVALID_HANDLE;
 }
 
 public Action OnPlayerSpawn(Event event, char[] name, bool dontBroadcast)
@@ -446,6 +453,9 @@ void HandCuffOn(int client, int target)
 
 	PrintToChatAll("%s %t", Prefix, "Handcuffed", client, target);
 	SDKHook(target, SDKHook_WeaponCanUse, OnWeaponThingy);
+	
+	if (g_bDebug) PrintToChatAll("%s %N got handcuffed succesfully", DPrefix, target);
+	
 	SaveWeapons(target);
 }
 
@@ -463,6 +473,9 @@ void HandCuffOff(int client, int target, bool forced)
 
 	if (!forced) PrintToChatAll("%s %t", Prefix, "Uncuffed", client, target);
 	SDKUnhook(target, SDKHook_WeaponCanUse, OnWeaponThingy);
+	
+	if (g_bDebug) PrintToChatAll("%s %N got uncuffed succesfully", DPrefix, target);
+	
 	RestoreWeapons(target);
 }
 
@@ -470,6 +483,7 @@ void PlaySound(bool Cuffed)
 { 
 	if (g_bSounds)
 	{
+		if (g_bDebug) PrintToChatAll("%s Handcuff sounds found", DPrefix);
 		if (Cuffed)
 		{
 			if (FileExists("sound/entity/handcuff/handcuff_off.mp3"))
@@ -497,4 +511,5 @@ void UnCuffAll()
 			PrintToChatAll("%s %t", Prefix, "PluginStopped", i);
 		}
 	}
+	if (g_bDebug) PrintToChatAll("%s Every player has been uncuffed", DPrefix);
 }
