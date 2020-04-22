@@ -1,0 +1,8 @@
+Added Round-End force handcuff removal
+Added Round-Start force handcuff removal
+Added Player-Death force handcuff removal
+Added new command sm_forceucall (flag b) to remove all handcuff
+Added Anti-Bot handcuff
+Added handcuff remove on hancuffer CT dies
+Fixed bug with no players ingame
+Added LastRequest support (Uncuff when LR avaliable) [OPTIONAL]
