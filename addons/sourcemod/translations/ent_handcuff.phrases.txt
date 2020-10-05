@@ -1,10 +1,11 @@
-﻿"Phrases"
+"Phrases"
 {
 	"TurnedOff"
 	{
 		"#format"	"{1:s}"
 		"hu"		"A {1} jelenleg ki van kapcsolva."
 		"en"		"The {1} is disabled."
+		"tr"        "{1} devre dışı."
 		"ru"		"Плагин {1} выключен."
 		"fr"		"{1} est désactiver."
 		"ro"		"{1} este dezactivat."
@@ -13,6 +14,7 @@
 	{
 		"hu"		"A parancs használatához életben kell lenned."
 		"en"		"You must be alive to use this command."
+		"tr"        "Bu komutu kullanmak için canlı olmalısın."
 		"ru"		"Вы должны быть живы, чтобы использовать эту команду."
 		"fr"		"Tu dois être en vie pour utiliser cette commande"
 		"ro"		"Trebuie sa fii in viata pentru a putea utiliza aceasta comanda."
@@ -21,6 +23,7 @@
 	{
 		"hu"		"A parancs csak a játékban használható."
 		"en"		"The command can be used in game only."
+		"tr"        "Bu komut yanlızca oyunda kullanabilir."
 		"ru"		"Команду можно использовать только в игре."
 		"fr"		"Cette commande ne peut être utilisé qu'en jeu."
 		"ro"		"Aceasta comanda se utilizeaza doar in joc."
@@ -29,6 +32,7 @@
 	{
 		"hu"		"Nincsenek körülötted játékosok."
 		"en"		"There are no players around you."
+		"tr"        "Etrafınızda hiç oyuncu yok."
 		"ru"		"Вокруг вас нет игроков."
 		"fr"		"Il n'y a pas de joueurs autours de toi."
 		"ro"		"Nu se afla jucatori in preajma ta."
@@ -37,6 +41,7 @@
 	{
 		"hu"		"A legközelebbi játékos egy BOT."
 		"en"		"The nearest player is a BOT."
+		"tr"        "Etrafınızda size en yakın olan oyuncu BOT"
 		"ru"		"Ближайший игрок - бот."
 		"fr"		"Le joueur le plus proche est un BOT."
 		"ro"		"Cel mai apropriat player este un BOT."
@@ -45,6 +50,7 @@
 	{
 		"hu"		"Ez a parancs a jelenlegi csapatban nem használható."
 		"en"		"This command cannot be used in the current team."
+		"tr"        "Bu komutu yanlızca CT takımı kullanabilir."
 		"ru"		"Эта команда не может быть использована в текущей команде."
 		"fr"		"Cette commande ne peut pas être utilisé dans cette équipe."
 		"ro"		"Aceasta comanda nu se poate utiliza in echipa actuala."
@@ -53,6 +59,7 @@
 	{
 		"hu"		"A legközelebbi játékos CT."
 		"en"		"The nearest player is a Guard."
+		"tr"        "Etrafınızda en yakın oyuncu CT."
 		"ru"		"Ближайший игрок - охранник."
 		"fr"		"Le joueur le plus proche est un guardiens."
 		"ro"		"Cel mai apropriat jucator este un gardian."
@@ -61,6 +68,7 @@
 	{
 		"hu"		"Ezt a játékost nem te bilincselted meg, így csak a társad halála után veheted le róla a bilincset."
 		"en"		"This player has been handcuffed by your teammate. You can only get off the handcuffs when your teammate dies."
+		"tr"        "Bu oyuncu takım arkadaşın tarafından kelepçelendi. Kelepçeleri ancak takım arkadaşınız öldüğünde kurtulabilirsiniz."
 		"ru"		"Этот игрок в наручниках от вашего товарища по команде. Вы можете снять наручники только тогда, когда ваш товарищ по команде умрет."
 		"fr"		"Ce joueur a été menotter par ton équipier. Tu ne peux pas enlevé les menottes avant que ton équipier soit mort."
 		"ro"		"Acest jucator a fost incatusat de catre un coechipier. Poti scoate catusele doar dupa moartea culegului tau."
@@ -70,6 +78,7 @@
 		"#format"	"{1:N},{2:N}"
 		"hu"		"{1} elkezdte megbilincselni {2} játékost."
 		"en"		"{1} started to handcuff {2}."
+		"tr"        "{1}, kelepçelemeye başladı {2}."
 		"ru"		"{1} начал надевать наручники на {2}."
 		"fr"		"{1} menotte {2}."
 		"ro"		"{1} il incatuseaza pe {2}."
@@ -79,6 +88,7 @@
 		"#format"	"{1:N},{2:N}"
 		"hu"		"{1} nem tudta megbilincselni {2} játékost."
 		"en"		"{1} didn't handcuff {2}."
+		"tr"        "{1}, kelepçelemedi {2}."
 		"ru"		"{1} не смог надеть наручники на игрока {2}."
 		"fr"		"{1} n'a pas de menotte."
 		"ro"		"{1} nu l-a incatusat pe {2}."
@@ -88,6 +98,7 @@
 		"#format"	"{1:N},{2:N}"
 		"hu"		"{1} elkezdte levenni {2} bilincsét."
 		"en"		"{1} started to uncuff {2}."
+		"tr"        "{1}, {2} ifadesini açmaya başladı."
 		"ru"		"{1} снимает наручники с {2}."
 		"fr"		"{1} démenotte {2}."
 		"ro"		"{1} ii scoate catusele lui {2}."
@@ -97,6 +108,7 @@
 		"#format"	"{1:N},{2:N}"
 		"hu"		"{1} nem tudta levenni {2} bilincsét."
 		"en"		"{1} didn't remove {2}'s handcuff."
+		"tr"        "{1}, {2} 'nin kelepçesini kaldırmadı."
 		"ru"		"{1} не смог снять с {2} наручники."
 		"fr"		"{1} n'a pas enlevé les menottes de {2}"
 		"ro"		"{1} nu i-a scos catusele lui {2}"
@@ -106,6 +118,7 @@
 		"#format"	"{1:N},{2:N}"
 		"hu"		"{1} megbilincselte {2} játékost."
 		"en"		"{2} has been handcuffed by {1}."
+		"tr"        "{2}, {1} tarafından kelepçelendi."
 		"ru"		"{2} надел наручники на {1}."
 		"fr"		"{2} a été démenotté par {1}."
 		"ro"		"Lui {2} i-au fost scoase catusele de catre {1}."
@@ -115,6 +128,7 @@
 		"#format"	"{1:N},{2:N}"
 		"hu"		"{1} levette {2} játékos bilincsét."
 		"en"		"{1} has removed the handcuff from {2}."
+		"tr"        "{1}, kelepçeyi {2} 'den kaldırdı."
 		"ru"		"{1} снял наручники с {2}."
 		"fr"		"{1} a enlevé les menottes de {2}."
 		"ro"		"{1} a scos catusele lui {2}."
@@ -123,6 +137,7 @@
 	{
 		"hu"		"Nincs elég játékos a bilincs használatához."
 		"en"		"There is not enough players to use handcuffs."
+		"tr"        "Kelepçe kullanmak için yeterli oyuncu yok."
 		"ru"		"Игрок не может использовать наручники."
 		"fr"		"Il n'y a pas assez de joueurs pour utiliser les menottes."
 		"ro"		"Nu sunt destui jucatori pentru a incatusa."
@@ -131,6 +146,7 @@
 	{
 		"hu"		"A bilincsed egy másik játékoson van."
 		"en"		"Your handcuffs are on another player."
+		"tr"        "Kelepçeleriniz başka bir oyuncuda."
 		"ru"		"Ваши наручники на другом игроке."
 		"fr"		"Tes menottes sont sur un autre joueur."
 		"ro"		"Catusele tale se afla la mainile unui alt jucator."
@@ -139,6 +155,7 @@
 	{
 		"hu"		"A bilincs hanghatások ki lettek kapcsolva, mivel nem található a hangfájl."
 		"en"		"Handcuff sounds has been turned off because no sound files found."
+		"tr"        "Ses dosyası bulunamadığı için kelepçe sesleri kapatıldı."
 		"ru"		"Звуки наручников были отключены, потому что звуковые файлы не найдены."
 		"fr"		"Le son des menottes est désactivé car il n'y a pas de fichier son."
 		"ro"		"Sunetul catuselor a fost oprit, deoarece nu a fost gasit niciun fisier audio."
@@ -148,6 +165,7 @@
 		"#format"	"{1:N}"
 		"hu"		"{1} bilincse levételre került, mivel a bilincs kiegészítés ki lett kapcsolva."
 		"en"		"Handcuff removed from {1} because the feature has been disabled."
+		"tr"        "Özellik devre dışı bırakıldığı için kelepçe {1} 'den kaldırıldı."
 		"ru"		"Наручники сняты с {1} потому что функция была отключена."
 		"fr"		"{1} a été démenotté car cette fonction a été désactivé."
 		"ro"		"Catusele de la mainile lui {1} au fost scoase, deoarece abilitatea a fost dezactivata."
